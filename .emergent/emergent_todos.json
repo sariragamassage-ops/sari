@@ -1,0 +1,30 @@
+[
+  {
+    "content": "Phase 2: Design guidelines from design_agent",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 2: Backend API + MongoDB seed content",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 2: Frontend app shell, sticky header, bottom nav, hero slider",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 2: Pages - Home, Harga, Galeri, Artikel, FAQ",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 2: All user stories covered in Development",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 2: End to End Testing using Testing Agent",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 2: Fix lightbox close button overlay issue",
+    "status": "completed"
+  }
+]
