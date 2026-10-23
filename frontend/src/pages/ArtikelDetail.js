@@ -1,39 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, CalendarDays, Clock, User } from "lucide-react";
-import { getArticle } from "../lib/api";
-import { PageLoader, ErrorState } from "../components/States";
+import { getArticleBySlug } from "../context/SiteContext";
+import { ErrorState } from "../components/States";
 import { ArticleCard } from "../components/ArticleCard";
 import { CtaStrip } from "../components/CtaStrip";
 import { Button } from "../components/ui/button";
 
 export default function ArtikelDetail() {
   const { slug } = useParams();
-  const [state, setState] = useState({ loading: true, error: null, data: null });
+  const result = useMemo(() => getArticleBySlug(slug), [slug]);
 
-  useEffect(() => {
-    let active = true;
-    setState({ loading: true, error: null, data: null });
-    getArticle(slug)
-      .then((res) => active && setState({ loading: false, error: null, data: res }))
-      .catch((e) => {
-        if (!active) return;
-        const msg =
-          e?.response?.status === 404
-            ? "Artikel tidak ditemukan."
-            : "Gagal memuat artikel. Periksa koneksi Anda lalu coba lagi.";
-        setState({ loading: false, error: msg, data: null });
-      });
-    return () => {
-      active = false;
-    };
-  }, [slug]);
-
-  if (state.loading) return <PageLoader label="Memuat artikel..." />;
-  if (state.error || !state.data)
+  if (!result)
     return (
       <div className="bg-white">
-        <ErrorState message={state.error} />
+        <ErrorState message="Artikel tidak ditemukan." />
         <div className="flex justify-center pb-16">
           <Link to="/artikel" data-testid="article-back-to-list">
             <Button className="h-11 rounded-xl bg-[var(--brand-500)] px-5 text-sm font-semibold text-white hover:bg-[var(--brand-600)]">
@@ -44,20 +25,32 @@ export default function ArtikelDetail() {
       </div>
     );
 
-  const { article, related } = state.data;
+  const { article, related } = result;
 
   return (
     <div data-testid="article-detail-page" className="bg-white">
-      <div className="relative h-64 w-full overflow-hidden bg-slate-200 sm:h-80">
-        <img src={article.image} alt={article.title} className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(27,66,66,0.85)] to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 mx-auto max-w-3xl px-4 pb-6 sm:px-6">
-          <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white ring-1 ring-white/30">
-            {article.category}
-          </span>
-          <h1 className="mt-3 font-heading text-2xl font-semibold leading-tight text-white sm:text-4xl">
-            {article.title}
-          </h1>
+      <div className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 sm:pt-8">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-slate-200 sm:aspect-[21/9]">
+          <img
+            src={article.image}
+            alt={article.title}
+            className="h-full w-full object-cover object-center"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(to top, rgba(10,34,34,0.92) 0%, rgba(10,34,34,0.68) 34%, rgba(10,34,34,0.18) 68%, rgba(10,34,34,0) 100%)",
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 px-5 pb-5 sm:px-8 sm:pb-7">
+            <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white ring-1 ring-white/30">
+              {article.category}
+            </span>
+            <h1 className="mt-3 max-w-3xl font-heading text-2xl font-semibold leading-tight text-white sm:text-4xl">
+              {article.title}
+            </h1>
+          </div>
         </div>
       </div>
 

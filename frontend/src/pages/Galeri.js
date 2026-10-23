@@ -11,7 +11,7 @@ export default function Galeri() {
   const [filter, setFilter] = useState("Semua");
   const lb = useLightbox();
 
-  const gallery = data?.gallery || [];
+  const gallery = useMemo(() => data?.gallery || [], [data]);
   const categories = useMemo(
     () => ["Semua", ...Array.from(new Set(gallery.map((g) => g.category)))],
     [gallery]
