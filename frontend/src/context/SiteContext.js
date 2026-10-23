@@ -1,35 +1,30 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { getBootstrap } from "../lib/api";
+import React, { createContext, useContext, useMemo } from "react";
+import content from "../data/content.json";
 
-const SiteContext = createContext({ data: null, loading: true, error: null });
+/**
+ * Seluruh konten website di-bundle langsung bersama aplikasi (lihat
+ * `frontend/src/data/content.json`, dihasilkan dari `backend/content_seed.py`
+ * melalui `python backend/export_content.py`).
+ *
+ * Dengan begitu website dapat tayang sebagai situs statis tanpa database:
+ * tidak ada panggilan jaringan, tidak ada kondisi gagal memuat, dan halaman
+ * langsung tampil seketika.
+ */
+const SiteContext = createContext({ data: content, loading: false, error: null });
 
 export const useSite = () => useContext(SiteContext);
 
+export const getArticleBySlug = (slug) => {
+  const article = content.articles.find((a) => a.slug === slug);
+  if (!article) return null;
+  const related = content.articles.filter((a) => a.slug !== slug).slice(0, 3);
+  return { article, related };
+};
+
 export const SiteProvider = ({ children }) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getBootstrap();
-      setData(res);
-    } catch (e) {
-      setError("Gagal memuat konten. Periksa koneksi Anda lalu coba lagi.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  return (
-    <SiteContext.Provider value={{ data, loading, error, reload: load }}>
-      {children}
-    </SiteContext.Provider>
+  const value = useMemo(
+    () => ({ data: content, loading: false, error: null, reload: () => {} }),
+    []
   );
+  return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;
 };

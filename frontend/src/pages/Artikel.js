@@ -9,7 +9,7 @@ export default function Artikel() {
   const { data, loading, error, reload } = useSite();
   const [cat, setCat] = useState("Semua");
 
-  const articles = data?.articles || [];
+  const articles = useMemo(() => data?.articles || [], [data]);
   const categories = useMemo(
     () => ["Semua", ...Array.from(new Set(articles.map((a) => a.category)))],
     [articles]

@@ -35,23 +35,33 @@ Jakarta, Tangerang, Bekasi, Depok, Bogor, serta kota besar lainnya di Indonesia
 | Lapisan | Teknologi |
 | --- | --- |
 | Frontend | React (CRA), React Router, Tailwind CSS, shadcn/ui, Framer Motion, Embla Carousel |
-| Backend | FastAPI, Motor (async MongoDB driver), Pydantic |
-| Database | MongoDB |
+| Backend (opsional) | FastAPI, Motor (async MongoDB driver), Pydantic |
+| Database (opsional) | MongoDB |
+| Hosting | Vercel (situs statis) |
+
+> **Catatan penting:** website ini tayang sebagai **situs statis** — seluruh konten
+> di-*bundle* bersama frontend (`frontend/src/data/content.json`), sehingga tidak
+> memerlukan database maupun server untuk tampil. Backend FastAPI tetap disertakan
+> di repo dan menyajikan konten yang sama melalui REST API, berguna bila nanti
+> dibutuhkan fitur yang menyimpan data (misalnya formulir pemesanan).
 
 ## Struktur Proyek
 
 ```
 backend/
-  server.py          # FastAPI app + seluruh endpoint /api
-  content_seed.py    # Seluruh konten website (layanan, harga, artikel, FAQ, dll.)
+  server.py            # FastAPI app + seluruh endpoint /api (opsional)
+  content_seed.py      # SUMBER KEBENARAN seluruh konten website
+  export_content.py    # Ekspor konten -> frontend/src/data/content.json
   requirements.txt
 frontend/
-  public/img/        # Gambar bernuansa spa/massage (di-bundle lokal)
-  public/logo.png    # Logo penuh Sari Raga Massage
-  src/pages/         # Home, Harga, Galeri, Artikel, ArtikelDetail, Faq, NotFound
-  src/components/    # Header, BottomNav, HeroSlider, PriceCards, Lightbox, dll.
-  src/context/       # SiteContext (pemuatan konten dari API)
-  src/lib/site.js    # Nomor WhatsApp, format rupiah, template pesan pesanan
+  vercel.json          # Konfigurasi build & routing untuk Vercel
+  public/img/          # Gambar bernuansa spa/massage (di-bundle lokal)
+  public/logo.png      # Logo penuh Sari Raga Massage
+  src/data/content.json# Konten statis hasil ekspor (jangan diedit manual)
+  src/pages/           # Home, Harga, Galeri, Artikel, ArtikelDetail, Faq, NotFound
+  src/components/      # Header, BottomNav, HeroSlider, PriceCards, Lightbox, dll.
+  src/context/         # SiteContext (menyediakan konten statis ke seluruh halaman)
+  src/lib/site.js      # Nomor WhatsApp, format rupiah, template pesan pesanan
 ```
 
 ## Menjalankan Secara Lokal
@@ -97,10 +107,33 @@ yarn start
 
 ## Mengubah Konten
 
-Seluruh teks, harga, testimoni, FAQ, dan artikel berada di `backend/content_seed.py`.
-Ubah nilainya lalu restart backend — perubahan akan otomatis tersimpan ke MongoDB.
+Seluruh teks, harga, testimoni, FAQ, dan artikel berada di `backend/content_seed.py`
+(satu-satunya sumber kebenaran). Setelah mengubahnya, jalankan:
+
+```bash
+cd backend && python export_content.py
+```
+
+Perintah di atas memperbarui `frontend/src/data/content.json`. Commit dan push
+kedua berkas tersebut — Vercel akan otomatis membangun ulang dan konten baru tayang.
+
 Nomor WhatsApp tujuan pemesanan diatur di `backend/content_seed.py`
 (`WHATSAPP_NUMBER`) dan `frontend/src/lib/site.js`.
+
+## Deploy ke Vercel
+
+Project Vercel terhubung ke repo ini dengan pengaturan:
+
+| Pengaturan | Nilai |
+| --- | --- |
+| Root Directory | `frontend` |
+| Framework Preset | Create React App |
+| Build Command | `yarn build` |
+| Output Directory | `build` |
+| Production Branch | `main` |
+
+Setiap push ke `main` otomatis memicu deployment produksi. Routing SPA dan
+cache aset diatur melalui `frontend/vercel.json`.
 
 ## Catatan
 
